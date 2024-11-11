@@ -27,7 +27,6 @@ router.get('/', (req, res) => {
 
 //RETURN THE SEARCH FULLTEXT OR FOR LANGUAGE AND CATEGORY
 router.get('/public/community', async (req, res) => { // ?text=...
-  console.log("/public/community")
   // full-text
   let text = req.query.text;
   // language chatbot
@@ -41,35 +40,26 @@ router.get('/public/community', async (req, res) => { // ?text=...
   // var query = { "id_project": req.projectid, "trashed": { $in: [null, false] } };
 
   // CONTROLL THE LANGUAGE SELECTED FROM THE USER
-  console.log('lang ', lang);
   if (lang && lang != 'undefined' && lang != 'all_lang') {
-    console.log("lang length", lang.split('-').length);
     if (lang.split('-').length > 1) {
       const lang1 = lang.split('-')[0];
-      console.log("before -:", lang1);
       const lang2 = lang.split('-')[1];
-      console.log("after -:", lang2);
       query.language = { '$in': [lang1, lang2] };
     } else {
       query.language = { '$in': [lang] };
     }
   }
   // CONTROLL THE CATEGORY SELECTED FROM THE USER
-  console.log('category ', category);
   if (category && category != 'undefined' && category != 'all_cat') {
     query.mainCategory = { '$in': [category] };
   }
   // CONTROLL THE FULL TEXT SEARCH 
-  console.log('text ', text);
   let search_obj = { "$search": text };
   if (text && text != 'undefined') {
     query.$text = search_obj;
-    console.log("Using query:", query);
   }
   try {
-    console.log("Using query:", query);
     bots = await faqKbService.getAll(query);
-    console.log("bots found:", bots.length);
     res.send(bots);
   }
   catch (err) {
@@ -81,11 +71,9 @@ router.get('/public/community', async (req, res) => { // ?text=...
 router.get('/public/author/:authoid', async (req, res) => {
   // author chatbot
   let authorid = req.params.authoid;
-  console.log("authorID:", authorid);
   let bots = [];
   let query = { 'public': true, trashed: { $in: [null, false] }, createdBy: { $eq: authorid } };
   try {
-    console.log("Using author query:", query);
     bots = await faqKbService.getAll(query);
     res.send(bots);
   }
@@ -124,7 +112,6 @@ router.get('/public/templates', async (req, res) => {
 router.get('/public/templates/:botid', (req, res) => {
   let id_faq_kb = req.params.botid;
   Faq_kb.findById(id_faq_kb, async (err, faq_kb) => {
-    console.log('FAQ-KB: ', faq_kb);
     if (err) {
       console.error('GET FAQ-KB ERROR ', err)
       return res.status(500).send({ success: false, msg: 'Error getting bot.' });
@@ -133,14 +120,6 @@ router.get('/public/templates/:botid', (req, res) => {
       return res.status(404).send({ success: false, msg: 'Not found.' });
     }
     else if (faq_kb["public"]) {
-      console.log("public chatbot");
-      console.log('public: ', faq_kb["public"]);
-      console.log('webhook_enabled', faq_kb["webhook_enabled"]);
-      console.log('type', faq_kb["type"]);
-      console.log('language', faq_kb["language"]);
-      console.log('name', faq_kb["name"]);
-      console.log('id_project', faq_kb["id_project"]);
-      console.log('trashed', faq_kb["trashed"]);
       let faqs = null;
       try {
         faqs = await faqService.getAll(id_faq_kb); //.then((faqs) => {
@@ -166,7 +145,6 @@ router.get('/public/templates/:botid', (req, res) => {
       }
     }
     else {
-      console.log("private chatbot");
       res.status(403).send({ success: false, message: "Forbidden" });
     }
   })
@@ -180,8 +158,6 @@ router.get('/public/templates/:botid', (req, res) => {
 router.get('/public/templates/windows/:botid', (req, res) => {
   let id_faq_kb = req.params.botid;
   Faq_kb.findById(id_faq_kb, async (err, faq_kb) => {
-    console.log('FAQ-KB: ', faq_kb);
-    //console.log('faq_kb.tags: ', faq_kb.tags);
     if (err) {
       console.error('GET FAQ-KB ERROR ', err)
       return res.status(500).send({ success: false, msg: 'Error getting bot.' });
@@ -213,7 +189,6 @@ router.get('/public/templates/windows/:botid', (req, res) => {
       return res.send(json);
     }
     else {
-      console.log("private chatbot");
       res.status(403).send({ success: false, message: "Forbidden" });
     }
   })
@@ -235,23 +210,19 @@ router.get('/public/templates/windows/:botid', (req, res) => {
 // }
 
 async function startApp(settings, callback) {
-  console.log("Starting Chatbot Templates App");
 
-
-  console.log("settings.MONGODB_URL: ", settings.MONGODB_URL)
   if (!settings.MONGODB_URL) {
     console.error("(ChatbotTemplates) MONGODB_URL is mandatory. Exit...");
     return callback("Missing parameter: MONGODB_URL");
   }
 
   if (settings.CHATBOT_TEMPLATES_LOG) {
-    console.log("Log activated for Chatbot Templates")
     log = true;
   }
 
   mongoose.connect(settings.MONGODB_URL, { "useNewUrlParser": true, "autoIndex": false }, async (err) => {
     if (err) {
-      console.log("(ChatbotTemplates) Failed to connect to MongoDB on " + settings.MONGODB_URL + " ", err);
+      console.error("(ChatbotTemplates) Failed to connect to MongoDB on " + settings.MONGODB_URL + " ", err);
     } else {
       console.log("(ChatbotTemplates) mongodb connection ok.");
 
