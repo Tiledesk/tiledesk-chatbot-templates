@@ -135,6 +135,8 @@ router.get('/public/templates/:botid', (req, res) => {
           //description: faq_kb.description,
           mainCategory: faq_kb.mainCategory,
           attributes: faq_kb.attributes,
+          ds_version: faq_kb.ds_version,
+          connectors: faq_kb.connectors,
           intents: intents
         }
         return res.send(json);

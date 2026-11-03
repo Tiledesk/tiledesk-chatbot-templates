@@ -83,6 +83,15 @@ var Faq_kbSchema = new Schema({
   attributes: {
     type: Object,
   },
+  // V3 agents only: 'v3' and the list of the links between blocks. Without them the fork of a V3 template is a V2 agent with no links.
+  ds_version: {
+    type: String,
+    required: false
+  },
+  connectors: {
+    type: Object,
+    required: false
+  },
   createdBy: {
     type: String,
     required: true
